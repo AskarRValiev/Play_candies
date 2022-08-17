@@ -16,7 +16,7 @@ from telegram.ext import (
 )
 
 # Определяем константы этапов разговора
-ORDER, HUMAN, BOT = range(3)
+ORDER, HUMAN = range(2)
 
 # функция обратного вызова точки входа в разговор
 def start(update, _):
@@ -42,8 +42,8 @@ def order(update, _):    #определяем кто ходит первым
         update.message.reply_text('Ходи первым')
         return HUMAN
     else:
-        update.message.reply_text('Первым хожу я')
-        return BOT
+        #update.message.reply_text('Первым хожу я')
+        bot(update, _)
     
     
 def human(update, _):   #ход человека
@@ -56,9 +56,9 @@ def human(update, _):   #ход человека
             'Спасибо за игру, заходи если будет скучно.')
             return ConversationHandler.END
         else:
-            update.message.reply_text(f'Ты взял {int(text)} конфет, теперь осталось {candies} конфет. Мой ход.'
-            'Нажми любую клавишу для продолжения')         #Костыль, без него не работает, не разобрался строка 113
-            return BOT
+            update.message.reply_text(f'Ты взял {int(text)} конфет, теперь осталось {candies} конфет. Мой ход.')
+            #return BOT
+            bot(update, _)
     elif not text.isdigit():
         update.message.reply_text('Ты уверен, что это число? Переходи!')
         return HUMAN
@@ -108,9 +108,9 @@ if __name__ == '__main__':
         
         # этапы разговора, каждый со своим списком обработчиков сообщений
         states={
-            ORDER: [MessageHandler(Filters.text, order), CommandHandler('cancel', cancel)],
-            HUMAN: [MessageHandler(Filters.text, human), CommandHandler('cancel', cancel)],
-            BOT: [MessageHandler(Filters.text, bot), CommandHandler('cancel', cancel)],     #костыль, я так и не понял как заставить бота работать самостоятельно            
+            ORDER: [MessageHandler(Filters.text & ~Filters.command, order)],
+            HUMAN: [MessageHandler(Filters.text & ~Filters.command, human)],
+            #BOT: [MessageHandler(Filters.text, bot), CommandHandler('cancel', cancel)],     #костыль, я так и не понял как заставить бота работать самостоятельно            
         },
         # точка выхода из разговора
         fallbacks=[CommandHandler('cancel', cancel)],       
